@@ -1,0 +1,3 @@
+{% for route in static_routes %}
+ip netns exec {{ route.namespace }} ip route replace {{ route.destination_cidr }} via {{ route.next_hop }}
+{% endfor %}

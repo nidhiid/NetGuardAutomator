@@ -1,0 +1,19 @@
+firewall_namespace: firewall
+firewall_rules:
+  - description: Allow established return traffic
+    chain: FORWARD
+    match: "-m conntrack --ctstate ESTABLISHED,RELATED"
+    action: ACCEPT
+  - description: Allow ICMP from client to server
+    chain: FORWARD
+    match: "-p icmp -s 10.0.1.2 -d 10.0.2.2"
+    action: ACCEPT
+  - description: Allow HTTP from client to server
+    chain: FORWARD
+    match: "-p tcp -s 10.0.1.2 -d 10.0.2.2 --dport 80"
+    action: ACCEPT
+  - description: Drop all other forwarded traffic
+    chain: FORWARD
+    match: ""
+    action: DROP
+static_routes: []

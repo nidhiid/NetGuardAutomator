@@ -1,0 +1,25 @@
+---
+- name: Apply firewall rules inside the lab namespace
+  hosts: lab
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Verify firewall namespace exists
+      ansible.builtin.command: ip netns exec {{ firewall_namespace }} ip link show
+      changed_when: false
+
+    - name: Flush existing FORWARD rules
+      ansible.builtin.command: ip netns exec {{ firewall_namespace }} iptables -F FORWARD
+      changed_when: true
+
+    - name: Set default FORWARD policy to DROP
+      ansible.builtin.command: ip netns exec {{ firewall_namespace }} iptables -P FORWARD DROP
+      changed_when: true
+
+    - name: Apply configured firewall rules
+      ansible.builtin.command: >
+        ip netns exec {{ firewall_namespace }} iptables
+        -A {{ item.chain }} {{ item.match }} -j {{ item.action }}
+      loop: "{{ firewall_rules }}"
+      changed_when: true

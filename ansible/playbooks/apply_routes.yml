@@ -1,0 +1,13 @@
+---
+- name: Apply static routes inside lab namespaces
+  hosts: lab
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Apply configured static routes
+      ansible.builtin.command: >
+        ip netns exec {{ item.namespace }} ip route replace
+        {{ item.destination_cidr }} via {{ item.next_hop }}
+      loop: "{{ static_routes }}"
+      changed_when: true
