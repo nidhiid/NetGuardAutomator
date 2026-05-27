@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+from collections import Counter
 import re
+import shlex
 import subprocess
 
 from django_bootstrap import setup_django
@@ -16,15 +18,58 @@ def normalize_rule(line):
     return line
 
 
+def option_value(tokens, option):
+    if option not in tokens:
+        return ""
+
+    index = tokens.index(option)
+    if index + 1 >= len(tokens):
+        return ""
+
+    return tokens[index + 1]
+
+
+def canonical_forward_rule(line):
+    line = normalize_rule(line)
+    if line.startswith("-P FORWARD"):
+        return line
+    if not line.startswith("-A FORWARD"):
+        return line
+
+    tokens = shlex.split(line)
+    protocol = option_value(tokens, "-p")
+    source = option_value(tokens, "-s")
+    destination = option_value(tokens, "-d")
+    destination_port = option_value(tokens, "--dport")
+    state = option_value(tokens, "--ctstate")
+    action = option_value(tokens, "-j")
+
+    parts = ["-A FORWARD"]
+    if state:
+        parts.extend(["-m", "conntrack", "--ctstate", state])
+    if protocol:
+        parts.extend(["-p", protocol])
+    if source:
+        parts.extend(["-s", source])
+    if destination:
+        parts.extend(["-d", destination])
+    if destination_port:
+        parts.extend(["--dport", destination_port])
+    if action:
+        parts.extend(["-j", action])
+
+    return " ".join(parts)
+
+
 def snapshot_to_forward_rules(rendered_config):
     rules = []
     for line in rendered_config.splitlines():
         line = normalize_rule(line)
         if line.startswith(":FORWARD "):
             parts = line.split()
-            rules.append(f"-P FORWARD {parts[1]}")
+            rules.append(canonical_forward_rule(f"-P FORWARD {parts[1]}"))
         elif line.startswith("-A FORWARD"):
-            rules.append(line)
+            rules.append(canonical_forward_rule(line))
     return rules
 
 
@@ -38,7 +83,7 @@ def current_forward_rules():
     if result.returncode != 0:
         raise RuntimeError(result.stderr or result.stdout)
 
-    return [normalize_rule(line) for line in result.stdout.splitlines() if line.strip()]
+    return [canonical_forward_rule(line) for line in result.stdout.splitlines() if line.strip()]
 
 
 def main():
@@ -65,7 +110,7 @@ def main():
     expected = snapshot_to_forward_rules(snapshot.rendered_config)
     current = current_forward_rules()
 
-    if expected == current:
+    if Counter(expected) == Counter(current):
         print("NO_CONFIG_DRIFT")
         return 0
 
