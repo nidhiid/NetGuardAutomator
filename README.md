@@ -1,4 +1,4 @@
-# Network Security Automation Lab
+# NetGuardAutomator
 
 Small MVP for a network security automation lab. This first slice creates a simulated network with Linux network namespaces, applies manual firewall rules, then automates those same rules with Ansible.
 

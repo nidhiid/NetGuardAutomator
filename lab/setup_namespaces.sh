@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
+
+# Dynamically find the script's directory and source constants.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/constants.sh"
+
 set -euo pipefail
-
-CLIENT_NS="client"
-FIREWALL_NS="firewall"
-SERVER_NS="server"
-
-CLIENT_VETH="veth-client"
-FW_CLIENT_VETH="veth-fw1"
-SERVER_VETH="veth-server"
-FW_SERVER_VETH="veth-fw2"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
