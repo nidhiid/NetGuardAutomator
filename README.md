@@ -14,6 +14,17 @@ Small MVP for a network security automation lab. This slice creates a simulated 
 3. Apply the same firewall policy with Ansible.
 4. Store firewall rules, static routes, config snapshots, rollback requests, and alerts through REST APIs.
 
+## Git Workflow
+
+Use `dev` for active development and merge into `main` only after a phase is tested.
+
+```bash
+git switch dev
+git pull
+```
+
+After testing a phase, open a pull request from `dev` into `main`.
+
 ## Requirements
 
 - Linux host, WSL2, or Linux VM
