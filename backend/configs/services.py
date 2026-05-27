@@ -8,6 +8,13 @@ from policies.models import FirewallRule
 from routes.models import StaticRoute
 
 
+def enabled_firewall_rules():
+    return sorted(
+        FirewallRule.objects.filter(enabled=True),
+        key=lambda rule: (rule.action != FirewallRule.ACTION_DENY, rule.id),
+    )
+
+
 def build_ansible_firewall_rule(rule):
     action = "ACCEPT" if rule.action == FirewallRule.ACTION_ALLOW else "DROP"
     protocol = rule.protocol.lower()
@@ -47,10 +54,7 @@ def build_ansible_vars():
             "action": "ACCEPT",
         }
     ]
-    firewall_rules.extend(
-        build_ansible_firewall_rule(rule)
-        for rule in FirewallRule.objects.filter(enabled=True).order_by("id")
-    )
+    firewall_rules.extend(build_ansible_firewall_rule(rule) for rule in enabled_firewall_rules())
     firewall_rules.append(
         {
             "description": "Drop all other forwarded traffic",
@@ -156,7 +160,7 @@ def render_firewall_config():
         "-A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT",
     ]
 
-    for rule in FirewallRule.objects.filter(enabled=True).order_by("id"):
+    for rule in enabled_firewall_rules():
         lines.append(render_firewall_rule(rule))
 
     lines.append("-A FORWARD -j DROP")

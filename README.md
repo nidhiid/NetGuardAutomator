@@ -149,6 +149,44 @@ After calling `/api/apply-config/`, verify the namespace firewall state:
 sudo ip netns exec firewall iptables -S FORWARD
 ```
 
+## 5. Run Monitoring Scripts
+
+Run these from the project root inside the Linux VM with the virtual environment activated:
+
+```bash
+source .venv/bin/activate
+```
+
+Health check:
+
+```bash
+python monitor/health_check.py
+```
+
+Drift detection compares current firewall namespace rules against the latest successfully applied config snapshot:
+
+```bash
+python monitor/drift_detector.py
+```
+
+Traffic simulation creates a high severity alert if request volume exceeds the threshold:
+
+```bash
+python monitor/ddos_detector.py --requests 100 --threshold 50
+```
+
+To simulate an automated response, add `--auto-block`. This creates a temporary DENY rule and calls the Ansible-backed config apply flow:
+
+```bash
+python monitor/ddos_detector.py --requests 100 --threshold 50 --auto-block
+```
+
+View alerts through the API:
+
+```bash
+curl http://127.0.0.1:8000/api/alerts/
+```
+
 ## Cleanup
 
 ```bash
