@@ -14,6 +14,61 @@ Small MVP for a network security automation lab. This slice creates a simulated 
 3. Apply the same firewall policy with Ansible.
 4. Store firewall rules, static routes, config snapshots, rollback requests, and alerts through REST APIs.
 
+## Hosted Demo Vs Self-Hosted Lab
+
+There are two ways to test NetGuardAutomator.
+
+### Hosted Oracle Demo
+
+If the Oracle Cloud VM is running and public ingress for TCP `8000` is enabled, testers do not need to run a VM or install anything locally. They can use the hosted API directly:
+
+```text
+http://150.136.56.25:8000/api/firewall-rules/
+http://150.136.56.25:8000/api/routes/
+http://150.136.56.25:8000/api/config-history/
+http://150.136.56.25:8000/api/alerts/
+```
+
+Use the Oracle VM public IP:
+
+```text
+150.136.56.25
+```
+
+### Self-Hosted Lab
+
+If someone wants to run the full lab themselves, they need their own Linux environment because the project uses Linux network namespaces and `iptables`.
+
+Good options:
+
+- Ubuntu VM
+- WSL2
+- Multipass Ubuntu VM
+- Oracle Cloud Ubuntu VM
+- Local Linux machine
+
+For self-hosting, they clone this repo, run the setup commands, and use the IP address of their own environment:
+
+```text
+127.0.0.1:8000                 from inside their own VM
+<their_vm_private_ip>:8000      from inside their cloud/private network
+<their_vm_public_ip>:8000       from their browser if they expose port 8000
+```
+
+For public access to your hosted demo, Oracle ingress can allow:
+
+```text
+0.0.0.0/0 -> TCP 8000
+```
+
+To make it private again, restrict the source to trusted public IPs:
+
+```text
+<trusted_public_ip>/32 -> TCP 8000
+```
+
+Do not expose PostgreSQL ports `5432` or `5433` publicly.
+
 ## Git Workflow
 
 Use `dev` for active development and merge into `main` only after a phase is tested.
