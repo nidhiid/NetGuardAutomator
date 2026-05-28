@@ -128,11 +128,14 @@ django.db.backends.postgresql 5433
 sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-api.service /etc/systemd/system/
 sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-frontend.service /etc/systemd/system/
 sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-lab.service /etc/systemd/system/
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-lab-http.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable netguard-lab
+sudo systemctl enable netguard-lab-http
 sudo systemctl enable netguard-api
 sudo systemctl enable netguard-frontend
 sudo systemctl start netguard-lab
+sudo systemctl start netguard-lab-http
 sudo systemctl start netguard-api
 sudo systemctl start netguard-frontend
 ```
@@ -141,6 +144,7 @@ Check service status:
 
 ```bash
 sudo systemctl status netguard-lab --no-pager
+sudo systemctl status netguard-lab-http --no-pager
 sudo systemctl status netguard-api --no-pager
 sudo systemctl status netguard-frontend --no-pager
 ```
@@ -150,6 +154,7 @@ View service logs:
 ```bash
 journalctl -u netguard-api -f
 journalctl -u netguard-frontend -f
+journalctl -u netguard-lab-http -f
 ```
 
 ## 8. Verify The Hosted API
@@ -316,6 +321,7 @@ cd backend
 python manage.py migrate
 sudo systemctl daemon-reload
 sudo systemctl restart netguard-lab
+sudo systemctl restart netguard-lab-http
 docker compose up -d postgres
 sudo systemctl restart netguard-api
 cd /home/ubuntu/NetGuardAutomator/frontend
@@ -339,6 +345,7 @@ sudo systemctl disable --now netguard-drift-detector.timer
 sudo systemctl disable --now netguard-route-verifier.timer
 sudo systemctl stop netguard-frontend
 sudo systemctl stop netguard-api
+sudo systemctl stop netguard-lab-http
 sudo systemctl stop netguard-lab
 docker compose down
 ```

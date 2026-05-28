@@ -167,6 +167,15 @@ sudo systemctl enable --now netguard-frontend
 sudo systemctl status netguard-frontend --no-pager
 ```
 
+The UI's HTTP live test expects a web server inside the `server` namespace. On the Oracle VM, keep that running with:
+
+```bash
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-lab-http.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now netguard-lab-http
+sudo systemctl status netguard-lab-http --no-pager
+```
+
 ## Git Workflow
 
 Use `dev` for active development and merge into `main` only after a phase is tested.

@@ -1,0 +1,15 @@
+[Unit]
+Description=NetGuardAutomator server namespace HTTP test service
+After=netguard-lab.service
+Requires=netguard-lab.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/ubuntu/NetGuardAutomator
+ExecStart=/usr/bin/ip netns exec server /usr/bin/python3 -m http.server 80
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

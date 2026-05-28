@@ -206,6 +206,8 @@ function App() {
   const [routeForm, setRouteForm] = useState(emptyRoute);
   const [loading, setLoading] = useState(true);
   const [labTest, setLabTest] = useState(null);
+  const [labTarget, setLabTarget] = useState("10.0.2.2");
+  const [labPort, setLabPort] = useState("80");
   const [submitting, setSubmitting] = useState("");
   const [notice, setNotice] = useState(null);
 
@@ -332,7 +334,11 @@ function App() {
   async function runLabTest(testType) {
     setSubmitting(`lab-${testType}`);
     try {
-      const result = await requestJson(`/api/lab-tests/${testType}/`);
+      const params = new URLSearchParams({ target: labTarget });
+      if (testType === "http") {
+        params.set("port", labPort || "80");
+      }
+      const result = await requestJson(`/api/lab-tests/${testType}/?${params.toString()}`);
       setLabTest(result);
       setNotice({
         type: result.success ? "success" : "error",
@@ -560,6 +566,10 @@ function App() {
             </Panel>
 
             <Panel title="Live Lab Tests" subtitle="Run bounded checks from client namespace to server namespace.">
+              <div className="mb-3 grid gap-3 sm:grid-cols-2">
+                <TextField label="Target IP" value={labTarget} onChange={setLabTarget} placeholder="10.0.2.2" />
+                <TextField label="HTTP Port" type="number" value={labPort} onChange={setLabPort} placeholder="80" />
+              </div>
               <div className="flex flex-wrap gap-2">
                 <PrimaryButton disabled={submitting === "lab-ping"} icon={Radio} onClick={() => runLabTest("ping")} tone="secondary">
                   {submitting === "lab-ping" ? "Running..." : "Ping Test"}
@@ -575,6 +585,7 @@ function App() {
                     <StatusPill tone={labTest.success ? "success" : "danger"}>{labTest.success ? "passed" : "failed"}</StatusPill>
                     <span className="text-sm font-bold uppercase text-slate-500">{labTest.test_type}</span>
                   </div>
+                  <p className="mb-2 break-words text-xs text-slate-500">{labTest.command}</p>
                   <pre className="max-h-44 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-slate-100">
                     {labTest.stdout || labTest.stderr || "No command output."}
                   </pre>
