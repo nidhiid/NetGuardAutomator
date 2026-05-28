@@ -1,0 +1,13 @@
+[Unit]
+Description=NetGuardAutomator namespace lab topology
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/NetGuardAutomator
+ExecStart=/home/ubuntu/NetGuardAutomator/lab/setup_namespaces.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=NetGuardAutomator Django API
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/NetGuardAutomator/backend
+Environment=DJANGO_SETTINGS_MODULE=netguard.settings
+ExecStart=/home/ubuntu/NetGuardAutomator/.venv/bin/python manage.py runserver 0.0.0.0:8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
