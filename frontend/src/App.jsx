@@ -91,7 +91,7 @@ function MetricCard({ icon: Icon, label, value }) {
 
 function Panel({ title, subtitle, children, action }) {
   return (
-    <section className="rounded-lg border border-line bg-white shadow-panel">
+    <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-white shadow-panel">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           <h2 className="text-base font-bold">{title}</h2>
@@ -99,7 +99,7 @@ function Panel({ title, subtitle, children, action }) {
         </div>
         {action}
       </header>
-      <div className="p-4">{children}</div>
+      <div className="min-w-0 p-4">{children}</div>
     </section>
   );
 }
@@ -150,6 +150,26 @@ function PrimaryButton({ children, onClick, disabled, tone = "primary", type = "
     >
       {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null}
       {children}
+    </button>
+  );
+}
+
+function IconButton({ label, onClick, disabled, tone = "secondary", icon: Icon }) {
+  const tones = {
+    secondary: "bg-slate-800 text-white hover:bg-slate-950",
+    danger: "bg-signal-red text-white hover:bg-red-800",
+  };
+
+  return (
+    <button
+      aria-label={label}
+      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition disabled:cursor-not-allowed disabled:opacity-55 ${tones[tone]}`}
+      disabled={disabled}
+      title={label}
+      type="button"
+      onClick={onClick}
+    >
+      <Icon className="h-4 w-4" aria-hidden="true" />
     </button>
   );
 }
@@ -353,8 +373,8 @@ function App() {
           <MetricCard icon={AlertTriangle} label="High Alerts" value={highAlerts} />
         </section>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
-          <div className="grid gap-5">
+        <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
+          <div className="grid min-w-0 gap-5">
             <Panel title="Firewall Policy" subtitle="Enabled records become iptables FORWARD rules when config is applied.">
               {loading ? (
                 <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -362,17 +382,17 @@ function App() {
                   Loading rules
                 </div>
               ) : firewallRules.length ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[860px] table-fixed border-collapse">
+                <div className="max-w-full overflow-x-auto">
+                  <table className="w-full min-w-[760px] table-fixed border-collapse">
                     <thead>
                       <tr className="border-b border-line text-left text-xs uppercase text-slate-500">
-                        <th className="px-3 py-2">Action</th>
-                        <th className="px-3 py-2">Source</th>
-                        <th className="px-3 py-2">Destination</th>
-                        <th className="px-3 py-2">Protocol</th>
-                        <th className="px-3 py-2">Port</th>
-                        <th className="px-3 py-2">Enabled</th>
-                        <th className="px-3 py-2">Manage</th>
+                        <th className="w-[13%] px-3 py-2">Action</th>
+                        <th className="w-[16%] px-3 py-2">Source</th>
+                        <th className="w-[16%] px-3 py-2">Destination</th>
+                        <th className="w-[12%] px-3 py-2">Protocol</th>
+                        <th className="w-[10%] px-3 py-2">Port</th>
+                        <th className="w-[12%] px-3 py-2">Enabled</th>
+                        <th className="w-[21%] px-3 py-2">Manage</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -390,22 +410,20 @@ function App() {
                           </td>
                           <td className="px-3 py-3">
                             <div className="flex flex-wrap gap-2">
-                              <PrimaryButton
+                              <IconButton
                                 disabled={submitting === `toggle-rule-${rule.id}`}
                                 icon={Power}
+                                label={rule.enabled ? `Disable rule ${rule.id}` : `Enable rule ${rule.id}`}
                                 onClick={() => toggleFirewallRule(rule)}
                                 tone="secondary"
-                              >
-                                {rule.enabled ? "Disable" : "Enable"}
-                              </PrimaryButton>
-                              <PrimaryButton
+                              />
+                              <IconButton
                                 disabled={submitting === `delete-rule-${rule.id}`}
                                 icon={Trash2}
+                                label={`Delete rule ${rule.id}`}
                                 onClick={() => deleteFirewallRule(rule)}
                                 tone="danger"
-                              >
-                                Delete
-                              </PrimaryButton>
+                              />
                             </div>
                           </td>
                         </tr>
@@ -504,7 +522,7 @@ function App() {
             </Panel>
           </div>
 
-          <aside className="grid content-start gap-5">
+          <aside className="grid min-w-0 content-start gap-5">
             <ApiKeyBox apiKey={apiKey} setApiKey={setApiKey} />
 
             <Panel
