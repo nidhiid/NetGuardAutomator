@@ -2,6 +2,14 @@
 
 Small MVP for a network security automation lab. This slice creates a simulated network with Linux network namespaces, applies firewall rules manually and with Ansible, exposes Django REST APIs for policies, routes, config history, rollback requests, and alerts, and provides a React + Tailwind dashboard for the lab workflow.
 
+## Dashboard Preview
+
+![NetGuardAutomator dashboard overview](docs/assets/screenshots/Dashboard1.png)
+
+![NetGuardAutomator firewall rules and protected actions](docs/assets/screenshots/Dashboard2.png)
+
+![NetGuardAutomator config history and alerts](docs/assets/screenshots/Dashboard3.png)
+
 ## Current MVP Scope
 
 1. Create a namespace topology:
@@ -29,6 +37,8 @@ http://150.136.56.25:8000/api/firewall-rules/
 http://150.136.56.25:8000/api/routes/
 http://150.136.56.25:8000/api/config-history/
 http://150.136.56.25:8000/api/alerts/
+http://150.136.56.25:8000/api/lab-tests/ping/?target=10.0.2.2
+http://150.136.56.25:8000/api/lab-tests/http/?target=10.0.2.2&port=80
 ```
 
 Use the Oracle VM public IP:
