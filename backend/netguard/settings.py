@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 
@@ -78,6 +79,12 @@ DATABASES = {
         "PORT": os.environ.get("POSTGRES_PORT", "5433"),
     }
 }
+
+if "test" in sys.argv:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

@@ -367,7 +367,18 @@ Demo screenshot and output checklist:
 docs/demo-evidence.md
 ```
 
-## 7. Deploy On Oracle Cloud
+## 7. Run Tests
+
+The test suite uses an in-memory SQLite database automatically, even though the runtime app defaults to PostgreSQL.
+
+```bash
+cd backend
+python manage.py test
+```
+
+The tests cover API creation/listing, policy validation, config rendering, mocked Ansible apply, rollback snapshot replay, and alert listing.
+
+## 8. Deploy On Oracle Cloud
 
 The full lab requires a Linux VM because it uses network namespaces, `iptables`, Docker, and long-running Django services.
 
