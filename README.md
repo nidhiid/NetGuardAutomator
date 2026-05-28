@@ -2,6 +2,23 @@
 
 Small MVP for a network security automation lab. This slice creates a simulated network with Linux network namespaces, applies firewall rules manually and with Ansible, exposes Django REST APIs for policies, routes, config history, rollback requests, and alerts, and provides a React + Tailwind dashboard for the lab workflow.
 
+## Why This Matters
+
+Network security engineering is not only about writing firewall rules; it is about building reliable systems that can safely automate, validate, monitor, and recover critical infrastructure changes.
+
+NetGuardAutomator simulates how production security teams manage firewall policy, routing state, configuration drift, rollback workflows, and traffic-based alerting through a centralized software control plane. The platform combines Django REST APIs, PostgreSQL-backed state management, Ansible automation, Linux networking, and monitoring scripts to create an auditable network security automation workflow.
+
+By modeling real operational concerns such as DDoS-style traffic spikes, failed connectivity checks, unauthorized configuration drift, and safe rollback, this project demonstrates how software engineering can be applied to protect and operate network infrastructure at scale.
+
+## Skills Demonstrated
+
+- Python automation and Django REST API development
+- Ansible-based configuration management
+- Linux networking with namespaces, iptables, and static routes
+- PostgreSQL-backed firewall rules, route state, config snapshots, and alerts
+- Config drift detection, rollback workflows, and DDoS-style traffic-volume alerting
+- CI/CD deployment with GitHub Actions, Docker Compose, systemd, and Oracle Cloud
+
 ## Dashboard Preview
 
 ![NetGuardAutomator dashboard overview](docs/assets/screenshots/Dashboard1.png)
