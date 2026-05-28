@@ -1,6 +1,8 @@
 # NetGuardAutomator
 
-Small MVP for a network security automation lab. This slice creates a simulated network with Linux network namespaces, applies firewall rules manually and with Ansible, exposes Django REST APIs for policies, routes, config history, rollback requests, and alerts, and provides a React + Tailwind dashboard for the lab workflow.
+NetGuardAutomator is a network security automation platform that simulates how infrastructure teams manage firewall policy, static routes, configuration history, rollback workflows, drift detection, and DDoS-style alerts through a centralized software control plane.
+
+The project creates a simulated Linux network using namespaces, applies firewall and routing changes manually and through Ansible, exposes Django REST APIs for policy management and audit history, and provides a React + Tailwind dashboard for operating the lab workflow.
 
 ## Why This Matters
 
