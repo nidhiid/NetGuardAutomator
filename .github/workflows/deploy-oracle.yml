@@ -1,0 +1,44 @@
+name: Deploy Oracle VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: oracle-vm-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          ORACLE_VM_HOST: ${{ secrets.ORACLE_VM_HOST }}
+          ORACLE_VM_SSH_KEY: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          ORACLE_VM_USER: ${{ secrets.ORACLE_VM_USER }}
+        run: |
+          test -n "${ORACLE_VM_HOST}"
+          test -n "${ORACLE_VM_SSH_KEY}"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${ORACLE_VM_SSH_KEY}" > ~/.ssh/oracle_vm_key
+          chmod 600 ~/.ssh/oracle_vm_key
+          ssh-keyscan -H "${ORACLE_VM_HOST}" >> ~/.ssh/known_hosts
+          {
+            echo "Host oracle-vm"
+            echo "  HostName ${ORACLE_VM_HOST}"
+            echo "  User ${ORACLE_VM_USER:-ubuntu}"
+            echo "  IdentityFile ~/.ssh/oracle_vm_key"
+            echo "  StrictHostKeyChecking yes"
+          } >> ~/.ssh/config
+
+      - name: Deploy
+        run: |
+          ssh oracle-vm 'cd /home/ubuntu/NetGuardAutomator && BRANCH=main ./scripts/deploy_oracle.sh'

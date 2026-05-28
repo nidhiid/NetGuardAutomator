@@ -240,6 +240,48 @@ git pull
 
 After testing a phase, open a pull request from `dev` into `main`.
 
+## Automatic Oracle Deployment
+
+The repo includes a GitHub Actions workflow that deploys the Oracle VM whenever `main` changes:
+
+```text
+.github/workflows/deploy-oracle.yml
+```
+
+The workflow SSHes into the VM and runs:
+
+```text
+scripts/deploy_oracle.sh
+```
+
+The deploy script:
+
+- pulls `main`
+- starts PostgreSQL with Docker Compose
+- installs Python dependencies
+- runs Django migrations
+- installs frontend dependencies
+- copies systemd service/timer files
+- restarts lab, API, frontend, and namespace HTTP services
+- enables monitoring timers
+
+Add these GitHub repository secrets:
+
+```text
+ORACLE_VM_HOST=150.136.56.25
+ORACLE_VM_USER=ubuntu
+ORACLE_VM_SSH_KEY=<private SSH key that can SSH into the VM>
+```
+
+The VM user must be able to run the project service commands with passwordless `sudo`, which is the default for the Oracle Ubuntu `ubuntu` user.
+
+You can also run the deploy script manually on the VM:
+
+```bash
+cd /home/ubuntu/NetGuardAutomator
+BRANCH=main ./scripts/deploy_oracle.sh
+```
+
 ## Requirements
 
 - Linux host, WSL2, or Linux VM
