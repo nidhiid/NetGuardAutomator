@@ -8,10 +8,10 @@ In Oracle Cloud Console:
 
 1. Create an Always Free eligible Ubuntu compute instance.
 2. Add your SSH public key.
-3. In the VM networking/security list, allow inbound TCP `8000` from your IP address.
-4. Keep SSH `22` allowed from your IP address.
+3. In the VM networking/security list, allow inbound TCP `8000`.
+4. Keep SSH `22` restricted to your own IP address.
 
-Avoid opening `8000` to the whole internet for long periods. This is a lab API with development settings.
+For a public portfolio demo, allow TCP `8000` from `0.0.0.0/0`. For a private demo, restrict TCP `8000` to specific `/32` public IP addresses.
 
 ## 2. SSH Into The VM
 
@@ -160,7 +160,43 @@ If the laptop curl fails:
    sudo ufw status
    ```
 
-## 9. Run The Full Demo
+## 9. Public Vs Private Access
+
+For a public demo link, use this Oracle Cloud ingress rule:
+
+```text
+Source Type: CIDR
+Source CIDR: 0.0.0.0/0
+IP Protocol: TCP
+Destination Port Range: 8000
+Stateless: off
+Description: NetGuardAutomator public API demo
+```
+
+Then share:
+
+```text
+http://<ORACLE_VM_PUBLIC_IP>:8000/api/firewall-rules/
+```
+
+To make the demo private again, replace the `0.0.0.0/0` source with one or more specific public IPs:
+
+```text
+Source CIDR: <trusted_public_ip>/32
+Destination Port Range: 8000
+```
+
+Find your current public IP:
+
+```bash
+curl -4 https://api.ipify.org
+```
+
+Keep PostgreSQL private. Do not add public ingress rules for `5432` or `5433`.
+
+Important: the current API is intentionally open for lab/demo use and includes write endpoints. Public mode is suitable for a short-lived portfolio demo. For a permanent public deployment, add authentication or expose a read-only frontend/reverse proxy.
+
+## 10. Run The Full Demo
 
 On the Oracle VM:
 
@@ -176,7 +212,7 @@ Expected final line:
 ==> Demo complete
 ```
 
-## 10. Restart After Code Changes
+## 11. Restart After Code Changes
 
 ```bash
 cd /home/ubuntu/NetGuardAutomator
@@ -189,7 +225,7 @@ sudo systemctl restart netguard-lab
 sudo systemctl restart netguard-api
 ```
 
-## 11. Stop Services
+## 12. Stop Services
 
 ```bash
 sudo systemctl stop netguard-api
@@ -200,5 +236,5 @@ docker compose down
 ## Notes
 
 - This deployment uses Django's development server for a lab demo. A production deployment should use Gunicorn and Nginx.
-- The API runs with development settings. Restrict port `8000` to your IP in Oracle Cloud security rules.
+- The API runs with development settings and has unauthenticated write endpoints. Use public ingress only for demos, or add authentication before long-term public exposure.
 - The lab requires root-level networking commands, so serverless or static hosting platforms are not suitable for the full project.

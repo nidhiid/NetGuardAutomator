@@ -259,6 +259,20 @@ Use the Oracle Cloud deployment guide:
 docs/deploy-oracle-cloud.md
 ```
 
+For a public demo, Oracle Cloud ingress can allow TCP `8000` from `0.0.0.0/0`, which makes the API reachable at:
+
+```text
+http://<ORACLE_VM_PUBLIC_IP>:8000/api/firewall-rules/
+```
+
+To make it private again, change the TCP `8000` ingress source to trusted public IPs only:
+
+```text
+<trusted_public_ip>/32
+```
+
+Do not expose PostgreSQL ports `5432` or `5433` publicly.
+
 ## Cleanup
 
 ```bash
