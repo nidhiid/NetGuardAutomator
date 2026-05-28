@@ -215,6 +215,24 @@ View alerts through the API:
 curl http://127.0.0.1:8000/api/alerts/
 ```
 
+Route verification compares static routes stored in the API database against routes inside each namespace:
+
+```bash
+python monitor/route_verifier.py
+```
+
+Example route workflow:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/routes/ \
+  -H "Content-Type: application/json" \
+  -d '{"namespace":"client","destination_cidr":"10.0.99.0/24","next_hop":"10.0.1.1"}'
+
+curl -X POST http://127.0.0.1:8000/api/apply-config/ | python -m json.tool
+
+python monitor/route_verifier.py
+```
+
 ## Cleanup
 
 ```bash
