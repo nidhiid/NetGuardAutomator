@@ -112,6 +112,20 @@ deploy/    systemd service files for hosted Oracle VM deployment
 docs/      Deployment guide and project documentation
 ```
 
+## Why Django?
+
+Django acts as the control plane for the lab. It does not forward packets itself; Linux namespaces, veth links, and `iptables` handle the actual network behavior.
+
+Django is used for:
+
+- REST APIs for firewall rules, static routes, config history, rollback, and alerts.
+- PostgreSQL-backed models for `FirewallRule`, `StaticRoute`, `ConfigSnapshot`, and `SecurityAlert`.
+- Config rendering from enabled policy records into Ansible variables and `iptables`-style snapshots.
+- Automation orchestration through `subprocess` calls to Ansible playbooks.
+- Audit history by storing rendered configs, Ansible stdout/stderr, timestamps, and success/failure state.
+- Rollback by replaying a saved config snapshot through Ansible.
+- Monitoring visibility by exposing health, drift, route, and traffic alerts through `/api/alerts/`.
+
 ## Git Workflow
 
 Use `dev` for active development and merge into `main` only after a phase is tested.
