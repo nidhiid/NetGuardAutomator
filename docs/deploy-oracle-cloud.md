@@ -97,6 +97,8 @@ docker compose ps
 docker compose exec postgres psql -U netguard -d netguard -c "select current_user, current_database();"
 ```
 
+The Postgres container uses `restart: unless-stopped`, so Docker should bring it back automatically after VM reboot.
+
 Expected:
 
 ```text
@@ -314,6 +316,7 @@ cd backend
 python manage.py migrate
 sudo systemctl daemon-reload
 sudo systemctl restart netguard-lab
+docker compose up -d postgres
 sudo systemctl restart netguard-api
 cd /home/ubuntu/NetGuardAutomator/frontend
 npm install
