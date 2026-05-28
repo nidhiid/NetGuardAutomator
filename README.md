@@ -105,16 +105,13 @@ Start PostgreSQL:
 docker compose up -d postgres
 ```
 
-Use the PostgreSQL environment values:
+Create a local environment file:
 
 ```bash
-export POSTGRES_ENGINE=django.db.backends.postgresql
-export POSTGRES_DB=netguard
-export POSTGRES_USER=netguard
-export POSTGRES_PASSWORD=netguard
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5433
+cp .env.example .env
 ```
+
+The project defaults to PostgreSQL on `localhost:5433`, and Django automatically loads `.env`.
 
 Run migrations and start the API:
 
@@ -123,8 +120,6 @@ cd backend
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
-
-The default development database is SQLite if the PostgreSQL environment variables are not set.
 
 Verify PostgreSQL is being used:
 
