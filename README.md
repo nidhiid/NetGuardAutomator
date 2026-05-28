@@ -42,16 +42,17 @@ By modeling real operational concerns such as DDoS-style traffic spikes, failed 
 4. Store firewall rules, static routes, config snapshots, rollback requests, and alerts through REST APIs.
 5. View and operate the lab through a React dashboard.
 
-## Hosted Demo Vs Self-Hosted Lab
+## Live Demo
 
-There are two ways to test NetGuardAutomator.
+NetGuardAutomator is deployed on an Oracle Cloud VM and is available for live review.
 
-### Hosted Oracle Demo
+- Frontend Dashboard: http://150.136.56.25:5173/
+- Backend API: http://150.136.56.25:8000/api/
+- Admin Panel: http://150.136.56.25:8000/admin/
 
-If the Oracle Cloud VM is running and public ingress is enabled, testers do not need to run a VM or install anything locally. They can use the hosted React dashboard and API directly:
+Useful public API examples:
 
 ```text
-http://150.136.56.25:5173/
 http://150.136.56.25:8000/api/firewall-rules/
 http://150.136.56.25:8000/api/routes/
 http://150.136.56.25:8000/api/config-history/
@@ -60,11 +61,7 @@ http://150.136.56.25:8000/api/lab-tests/ping/?target=10.0.2.2
 http://150.136.56.25:8000/api/lab-tests/http/?target=10.0.2.2&port=80
 ```
 
-Use the Oracle VM public IP:
-
-```text
-150.136.56.25
-```
+The live demo runs on a persistent Oracle Cloud VM. The project can also be self-hosted on any Linux VM using the setup steps below.
 
 ### Self-Hosted Lab
 
