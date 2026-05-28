@@ -113,7 +113,7 @@ export POSTGRES_DB=netguard
 export POSTGRES_USER=netguard
 export POSTGRES_PASSWORD=netguard
 export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
+export POSTGRES_PORT=5433
 ```
 
 Run migrations and start the API:
@@ -167,6 +167,13 @@ Because applying namespace firewall rules requires elevated privileges, the Djan
 After calling `/api/apply-config/`, verify the namespace firewall state:
 
 ```bash
+sudo ip netns exec firewall iptables -S FORWARD
+```
+
+Rollback replays the saved snapshot config with Ansible:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/rollback/1/ | python -m json.tool
 sudo ip netns exec firewall iptables -S FORWARD
 ```
 

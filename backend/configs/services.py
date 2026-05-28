@@ -82,6 +82,22 @@ def write_ansible_vars_file(ansible_vars):
     return vars_path
 
 
+def write_named_ansible_vars_file(filename, ansible_vars):
+    runtime_dir = Path(settings.ANSIBLE_RUNTIME_DIR)
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    vars_path = runtime_dir / filename
+    vars_path.write_text(json.dumps(ansible_vars, indent=2), encoding="utf-8")
+    return vars_path
+
+
+def write_named_runtime_file(filename, contents):
+    runtime_dir = Path(settings.ANSIBLE_RUNTIME_DIR)
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    file_path = runtime_dir / filename
+    file_path.write_text(contents, encoding="utf-8")
+    return file_path
+
+
 def run_ansible_playbook(playbook_path, vars_path):
     command = [
         "ansible-playbook",
@@ -131,6 +147,40 @@ def apply_config_with_ansible():
         "stdout": firewall_result["stdout"] + "\n" + routes_result["stdout"],
         "stderr": firewall_result["stderr"] + "\n" + routes_result["stderr"],
     }
+
+
+def split_rendered_config(rendered_config):
+    firewall_lines = []
+    route_commands = []
+    in_routes = False
+
+    for raw_line in rendered_config.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line == "# Static routes":
+            in_routes = True
+            continue
+        if in_routes:
+            route_commands.append(line)
+        else:
+            firewall_lines.append(raw_line)
+
+    return "\n".join(firewall_lines).strip() + "\n", route_commands
+
+
+def rollback_config_with_ansible(source_snapshot):
+    firewall_config, route_commands = split_rendered_config(source_snapshot.rendered_config)
+    rules_path = write_named_runtime_file(f"rollback_snapshot_{source_snapshot.id}.rules", firewall_config)
+    vars_path = write_named_ansible_vars_file(
+        f"rollback_snapshot_{source_snapshot.id}.json",
+        {
+            "firewall_namespace": "firewall",
+            "rollback_rules_path": str(rules_path),
+            "rollback_route_commands": route_commands,
+        },
+    )
+    return run_ansible_playbook(settings.ANSIBLE_ROLLBACK_PLAYBOOK, vars_path)
 
 
 def render_firewall_rule(rule):

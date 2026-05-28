@@ -93,6 +93,10 @@ ANSIBLE_ROUTES_PLAYBOOK = os.environ.get(
     "ANSIBLE_ROUTES_PLAYBOOK",
     PROJECT_ROOT / "ansible" / "playbooks" / "apply_routes.yml",
 )
+ANSIBLE_ROLLBACK_PLAYBOOK = os.environ.get(
+    "ANSIBLE_ROLLBACK_PLAYBOOK",
+    PROJECT_ROOT / "ansible" / "playbooks" / "rollback_config.yml",
+)
 ANSIBLE_RUNTIME_DIR = os.environ.get("ANSIBLE_RUNTIME_DIR", PROJECT_ROOT / "ansible" / "generated")
 
 REST_FRAMEWORK = {

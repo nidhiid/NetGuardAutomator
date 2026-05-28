@@ -1,0 +1,21 @@
+---
+- name: Roll back firewall namespace to a saved rendered config
+  hosts: lab
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Verify firewall namespace exists
+      ansible.builtin.command: ip netns exec {{ firewall_namespace }} ip link show
+      changed_when: false
+
+    - name: Restore saved iptables rules
+      ansible.builtin.command: ip netns exec {{ firewall_namespace }} iptables-restore
+      args:
+        stdin: "{{ lookup('ansible.builtin.file', rollback_rules_path) }}"
+      changed_when: true
+
+    - name: Replay saved static route commands
+      ansible.builtin.command: "{{ item }}"
+      loop: "{{ rollback_route_commands }}"
+      changed_when: true
