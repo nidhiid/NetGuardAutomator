@@ -76,6 +76,18 @@ cp .env.example .env
 docker compose up -d postgres
 ```
 
+Before public demos, edit `.env` and set a non-default API key:
+
+```bash
+nano .env
+```
+
+Set:
+
+```text
+NETGUARD_API_KEY=<long-random-demo-key>
+```
+
 Verify PostgreSQL:
 
 ```bash
@@ -194,7 +206,7 @@ curl -4 https://api.ipify.org
 
 Keep PostgreSQL private. Do not add public ingress rules for `5432` or `5433`.
 
-Important: the current API is intentionally open for lab/demo use and includes write endpoints. Public mode is suitable for a short-lived portfolio demo. For a permanent public deployment, add authentication or expose a read-only frontend/reverse proxy.
+Important: public `GET` endpoints are open for portfolio reviewers. Write operations require the `X-NetGuard-API-Key` header configured by `NETGUARD_API_KEY`. Keep that key private.
 
 ## 10. Run The Full Demo
 

@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from monitoring.models import SecurityAlert
@@ -74,9 +74,11 @@ class ConfigRenderingTests(TestCase):
         )
 
 
+@override_settings(NETGUARD_API_KEY="test-key")
 class ConfigApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.client.credentials(HTTP_X_NETGUARD_API_KEY="test-key")
 
     @patch("configs.views.apply_config_with_ansible")
     def test_apply_config_creates_successful_snapshot(self, mock_apply):

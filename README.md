@@ -248,24 +248,32 @@ django.db.backends.postgresql
 Example API calls:
 
 ```bash
+export NETGUARD_API_KEY=change-me-before-public-demo
+
 curl -X POST http://127.0.0.1:8000/api/firewall-rules/ \
   -H "Content-Type: application/json" \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}" \
   -d '{"source_ip":"10.0.1.2","destination_ip":"10.0.2.2","protocol":"tcp","port":80,"action":"ALLOW","enabled":true}'
 
 curl http://127.0.0.1:8000/api/firewall-rules/
 
 curl -X POST http://127.0.0.1:8000/api/routes/ \
   -H "Content-Type: application/json" \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}" \
   -d '{"namespace":"client","destination_cidr":"10.0.2.0/24","next_hop":"10.0.1.1"}'
 
-curl -X POST http://127.0.0.1:8000/api/apply-config/
+curl -X POST http://127.0.0.1:8000/api/apply-config/ \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}"
 
 curl http://127.0.0.1:8000/api/config-history/
 
 curl http://127.0.0.1:8000/api/alerts/
 
-curl -X POST http://127.0.0.1:8000/api/rollback/1/
+curl -X POST http://127.0.0.1:8000/api/rollback/1/ \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}"
 ```
+
+Public `GET` endpoints are open for demo/reviewer access. Write operations require the `X-NetGuard-API-Key` header configured by `NETGUARD_API_KEY` in `.env`.
 
 `POST /api/apply-config/` renders enabled rules, writes Ansible runtime variables, runs the firewall and route playbooks, and stores stdout/stderr in config history.
 

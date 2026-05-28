@@ -25,6 +25,7 @@ load_env_file(PROJECT_ROOT / ".env")
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-netguard-secret-key")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,*").split(",")
+NETGUARD_API_KEY = os.environ.get("NETGUARD_API_KEY", "")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -117,6 +118,9 @@ ANSIBLE_ROLLBACK_PLAYBOOK = os.environ.get(
 ANSIBLE_RUNTIME_DIR = os.environ.get("ANSIBLE_RUNTIME_DIR", PROJECT_ROOT / "ansible" / "generated")
 
 REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "netguard.permissions.ReadOnlyOrApiKey",
+    ],
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",

@@ -7,6 +7,18 @@ HTTP_LOG="${HTTP_LOG:-/tmp/netguard-demo-http.log}"
 
 HTTP_SERVER_PID=""
 
+load_env_file() {
+  local env_file="${PROJECT_ROOT}/.env"
+  if [[ ! -f "${env_file}" ]]; then
+    return
+  fi
+
+  set -a
+  # shellcheck disable=SC1090
+  source "${env_file}"
+  set +a
+}
+
 cleanup() {
   if [[ -n "${HTTP_SERVER_PID}" ]] && kill -0 "${HTTP_SERVER_PID}" 2>/dev/null; then
     kill "${HTTP_SERVER_PID}" 2>/dev/null || true
@@ -50,9 +62,14 @@ django_shell() {
 post_json() {
   local path="$1"
   local body="$2"
+  local headers=(-H "Content-Type: application/json")
+
+  if [[ -n "${NETGUARD_API_KEY:-}" ]]; then
+    headers+=(-H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}")
+  fi
 
   curl -fsS -X POST "${API_BASE_URL}${path}" \
-    -H "Content-Type: application/json" \
+    "${headers[@]}" \
     -d "${body}" | python -m json.tool
 }
 
@@ -65,6 +82,7 @@ require_command python
 require_command sudo
 
 cd "${PROJECT_ROOT}"
+load_env_file
 
 info "Checking Django API"
 api_check
