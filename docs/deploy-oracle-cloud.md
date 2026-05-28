@@ -30,6 +30,8 @@ sudo apt install -y \
   curl \
   python3-venv \
   python3-pip \
+  nodejs \
+  npm \
   docker.io \
   docker-compose-v2 \
   iproute2 \
@@ -122,12 +124,15 @@ django.db.backends.postgresql 5433
 
 ```bash
 sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-api.service /etc/systemd/system/
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-frontend.service /etc/systemd/system/
 sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-lab.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable netguard-lab
 sudo systemctl enable netguard-api
+sudo systemctl enable netguard-frontend
 sudo systemctl start netguard-lab
 sudo systemctl start netguard-api
+sudo systemctl start netguard-frontend
 ```
 
 Check service status:
@@ -135,12 +140,14 @@ Check service status:
 ```bash
 sudo systemctl status netguard-lab --no-pager
 sudo systemctl status netguard-api --no-pager
+sudo systemctl status netguard-frontend --no-pager
 ```
 
-View API logs:
+View service logs:
 
 ```bash
 journalctl -u netguard-api -f
+journalctl -u netguard-frontend -f
 ```
 
 ## 8. Verify The Hosted API
@@ -159,12 +166,12 @@ curl http://<ORACLE_VM_PUBLIC_IP>:8000/api/firewall-rules/
 
 ## 8.1 Run The React Dashboard
 
-The React dashboard is a separate Vite app. For development/demo use on the VM:
+The React dashboard is a separate Vite app. Install frontend dependencies once:
 
 ```bash
 cd /home/ubuntu/NetGuardAutomator/frontend
 npm install
-npm run dev -- --host 0.0.0.0
+sudo systemctl restart netguard-frontend
 ```
 
 If Oracle ingress allows TCP `5173`, open:
@@ -308,6 +315,9 @@ python manage.py migrate
 sudo systemctl daemon-reload
 sudo systemctl restart netguard-lab
 sudo systemctl restart netguard-api
+cd /home/ubuntu/NetGuardAutomator/frontend
+npm install
+sudo systemctl restart netguard-frontend
 ```
 
 If timer files changed, restart the timers:
@@ -324,6 +334,7 @@ sudo systemctl restart netguard-route-verifier.timer
 sudo systemctl disable --now netguard-health-check.timer
 sudo systemctl disable --now netguard-drift-detector.timer
 sudo systemctl disable --now netguard-route-verifier.timer
+sudo systemctl stop netguard-frontend
 sudo systemctl stop netguard-api
 sudo systemctl stop netguard-lab
 docker compose down

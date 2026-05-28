@@ -158,6 +158,15 @@ http://127.0.0.1:5173/
 
 The Vite dev server proxies `/api/...` to Django on `127.0.0.1:8000`, so no CORS changes are needed for local development.
 
+On the Oracle VM, keep the dashboard running with systemd:
+
+```bash
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-frontend.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now netguard-frontend
+sudo systemctl status netguard-frontend --no-pager
+```
+
 ## Git Workflow
 
 Use `dev` for active development and merge into `main` only after a phase is tested.
