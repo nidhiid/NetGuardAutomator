@@ -69,6 +69,49 @@ To make it private again, restrict the source to trusted public IPs:
 
 Do not expose PostgreSQL ports `5432` or `5433` publicly.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    user[Browser / curl user] -->|HTTP :8000| api[Django REST API]
+    api -->|ORM| db[(PostgreSQL)]
+    api -->|subprocess| ansible[Ansible Playbooks]
+    ansible -->|ip netns exec| firewall[firewall namespace<br/>iptables + routing]
+    firewall <-->|veth| client[client namespace<br/>10.0.1.2]
+    firewall <-->|veth| server[server namespace<br/>10.0.2.2]
+
+    monitor[Monitoring scripts] -->|read health / drift / traffic| firewall
+    monitor -->|create SecurityAlert rows| api
+    api -->|config history + alerts| db
+
+    systemd[systemd services] --> api
+    systemd --> firewall
+    docker[Docker Compose] --> db
+```
+
+Runtime flow:
+
+```text
+FirewallRule / StaticRoute API records
+        -> POST /api/apply-config/
+        -> render config snapshot
+        -> run Ansible
+        -> apply iptables/routes inside namespaces
+        -> store ConfigSnapshot stdout/stderr
+        -> monitoring scripts create SecurityAlert records
+```
+
+Key directories:
+
+```text
+backend/   Django REST API, models, serializers, config apply and rollback logic
+ansible/   Inventory, firewall/route/rollback playbooks, templates
+lab/       Linux namespace setup and teardown scripts
+monitor/   Health, drift, route, and traffic detection scripts
+deploy/    systemd service files for hosted Oracle VM deployment
+docs/      Deployment guide and project documentation
+```
+
 ## Git Workflow
 
 Use `dev` for active development and merge into `main` only after a phase is tested.
