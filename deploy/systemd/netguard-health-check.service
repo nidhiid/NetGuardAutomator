@@ -1,0 +1,10 @@
+[Unit]
+Description=NetGuardAutomator health check
+After=netguard-lab.service netguard-api.service docker.service
+Requires=netguard-lab.service netguard-api.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/home/ubuntu/NetGuardAutomator
+ExecStart=/home/ubuntu/NetGuardAutomator/.venv/bin/python /home/ubuntu/NetGuardAutomator/monitor/health_check.py

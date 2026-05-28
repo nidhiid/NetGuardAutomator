@@ -1,0 +1,10 @@
+[Unit]
+Description=Run NetGuardAutomator health check every 2 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+Unit=netguard-health-check.service
+
+[Install]
+WantedBy=timers.target

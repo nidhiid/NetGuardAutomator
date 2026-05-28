@@ -224,7 +224,61 @@ Expected final line:
 ==> Demo complete
 ```
 
-## 11. Restart After Code Changes
+## 11. Install Scheduled Monitoring
+
+The lab can run recurring health, drift, and route checks with systemd timers. These scripts write alerts into PostgreSQL through Django models.
+
+Install the timer units:
+
+```bash
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-health-check.* /etc/systemd/system/
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-drift-detector.* /etc/systemd/system/
+sudo cp /home/ubuntu/NetGuardAutomator/deploy/systemd/netguard-route-verifier.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now netguard-health-check.timer
+sudo systemctl enable --now netguard-drift-detector.timer
+sudo systemctl enable --now netguard-route-verifier.timer
+```
+
+Verify timers are scheduled:
+
+```bash
+systemctl list-timers 'netguard-*' --no-pager
+```
+
+Run each check immediately:
+
+```bash
+sudo systemctl start netguard-health-check.service
+sudo systemctl start netguard-drift-detector.service
+sudo systemctl start netguard-route-verifier.service
+```
+
+Check logs:
+
+```bash
+journalctl -u netguard-health-check.service -n 50 --no-pager
+journalctl -u netguard-drift-detector.service -n 50 --no-pager
+journalctl -u netguard-route-verifier.service -n 50 --no-pager
+```
+
+Check alerts through the API:
+
+```bash
+curl http://127.0.0.1:8000/api/alerts/ | python -m json.tool
+```
+
+If drift or a route mismatch is detected, the related service run can show as failed. That is expected because the monitor exits nonzero when it creates a problem alert.
+
+Stop scheduled monitoring:
+
+```bash
+sudo systemctl disable --now netguard-health-check.timer
+sudo systemctl disable --now netguard-drift-detector.timer
+sudo systemctl disable --now netguard-route-verifier.timer
+```
+
+## 12. Restart After Code Changes
 
 ```bash
 cd /home/ubuntu/NetGuardAutomator
@@ -233,13 +287,25 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cd backend
 python manage.py migrate
+sudo systemctl daemon-reload
 sudo systemctl restart netguard-lab
 sudo systemctl restart netguard-api
 ```
 
-## 12. Stop Services
+If timer files changed, restart the timers:
 
 ```bash
+sudo systemctl restart netguard-health-check.timer
+sudo systemctl restart netguard-drift-detector.timer
+sudo systemctl restart netguard-route-verifier.timer
+```
+
+## 13. Stop Services
+
+```bash
+sudo systemctl disable --now netguard-health-check.timer
+sudo systemctl disable --now netguard-drift-detector.timer
+sudo systemctl disable --now netguard-route-verifier.timer
 sudo systemctl stop netguard-api
 sudo systemctl stop netguard-lab
 docker compose down
@@ -248,5 +314,5 @@ docker compose down
 ## Notes
 
 - This deployment uses Django's development server for a lab demo. A production deployment should use Gunicorn and Nginx.
-- The API runs with development settings and has unauthenticated write endpoints. Use public ingress only for demos, or add authentication before long-term public exposure.
+- The API runs with development settings. Public `GET` endpoints are open for demos, and write operations require the `X-NetGuard-API-Key` header.
 - The lab requires root-level networking commands, so serverless or static hosting platforms are not suitable for the full project.

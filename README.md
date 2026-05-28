@@ -288,7 +288,8 @@ sudo ip netns exec firewall iptables -S FORWARD
 Rollback replays the saved snapshot config with Ansible:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/rollback/1/ | python -m json.tool
+curl -X POST http://127.0.0.1:8000/api/rollback/1/ \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}" | python -m json.tool
 sudo ip netns exec firewall iptables -S FORWARD
 ```
 
@@ -336,14 +337,32 @@ Route verification compares static routes stored in the API database against rou
 python monitor/route_verifier.py
 ```
 
+On the hosted Oracle VM, these checks can also run automatically through systemd timers:
+
+```text
+deploy/systemd/netguard-health-check.timer     every 2 minutes
+deploy/systemd/netguard-drift-detector.timer   every 5 minutes
+deploy/systemd/netguard-route-verifier.timer   every 5 minutes
+```
+
+Install and verify the timers with the Oracle deployment guide:
+
+```text
+docs/deploy-oracle-cloud.md
+```
+
 Example route workflow:
 
 ```bash
+export NETGUARD_API_KEY=change-me-before-public-demo
+
 curl -X POST http://127.0.0.1:8000/api/routes/ \
   -H "Content-Type: application/json" \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}" \
   -d '{"namespace":"client","destination_cidr":"10.0.99.0/24","next_hop":"10.0.1.1"}'
 
-curl -X POST http://127.0.0.1:8000/api/apply-config/ | python -m json.tool
+curl -X POST http://127.0.0.1:8000/api/apply-config/ \
+  -H "X-NetGuard-API-Key: ${NETGUARD_API_KEY}" | python -m json.tool
 
 python monitor/route_verifier.py
 ```
