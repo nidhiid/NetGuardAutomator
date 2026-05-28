@@ -33,6 +33,7 @@ After testing a phase, open a pull request from `dev` into `main`.
 - `iptables`
 - `python3`
 - `ansible`
+- Docker and Docker Compose for PostgreSQL
 - Django REST Framework dependencies from `requirements.txt`
 
 macOS does not support Linux network namespaces directly, so run these commands inside a Linux environment.
@@ -98,15 +99,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Run migrations and start the API:
+Start PostgreSQL:
 
 ```bash
-cd backend
-python manage.py migrate
-python manage.py runserver 0.0.0.0:8000
+docker compose up -d postgres
 ```
 
-The default development database is SQLite. To use PostgreSQL later, set:
+Use the PostgreSQL environment values:
 
 ```bash
 export POSTGRES_ENGINE=django.db.backends.postgresql
@@ -115,6 +114,28 @@ export POSTGRES_USER=netguard
 export POSTGRES_PASSWORD=netguard
 export POSTGRES_HOST=localhost
 export POSTGRES_PORT=5432
+```
+
+Run migrations and start the API:
+
+```bash
+cd backend
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
+```
+
+The default development database is SQLite if the PostgreSQL environment variables are not set.
+
+Verify PostgreSQL is being used:
+
+```bash
+python manage.py shell -c "from django.conf import settings; print(settings.DATABASES['default']['ENGINE'])"
+```
+
+Expected output:
+
+```text
+django.db.backends.postgresql
 ```
 
 Example API calls:
