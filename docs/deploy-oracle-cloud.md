@@ -8,7 +8,7 @@ In Oracle Cloud Console:
 
 1. Create an Always Free eligible Ubuntu compute instance.
 2. Add your SSH public key.
-3. In the VM networking/security list, allow inbound TCP `8000`.
+3. In the VM networking/security list, allow inbound TCP `8000` for the API and TCP `5173` if you want to expose the React dashboard.
 4. Keep SSH `22` restricted to your own IP address.
 
 For a public portfolio demo, allow TCP `8000` from `0.0.0.0/0`. For a private demo, restrict TCP `8000` to specific `/32` public IP addresses.
@@ -156,6 +156,24 @@ From your laptop:
 ```bash
 curl http://<ORACLE_VM_PUBLIC_IP>:8000/api/firewall-rules/
 ```
+
+## 8.1 Run The React Dashboard
+
+The React dashboard is a separate Vite app. For development/demo use on the VM:
+
+```bash
+cd /home/ubuntu/NetGuardAutomator/frontend
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+If Oracle ingress allows TCP `5173`, open:
+
+```text
+http://<ORACLE_VM_PUBLIC_IP>:5173/
+```
+
+The frontend dev server proxies `/api/...` to Django on `127.0.0.1:8000`.
 
 If the laptop curl fails:
 

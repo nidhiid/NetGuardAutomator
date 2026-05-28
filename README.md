@@ -1,6 +1,6 @@
 # NetGuardAutomator
 
-Small MVP for a network security automation lab. This slice creates a simulated network with Linux network namespaces, applies firewall rules manually and with Ansible, and exposes early Django REST APIs for policies, routes, config history, rollback requests, and alerts.
+Small MVP for a network security automation lab. This slice creates a simulated network with Linux network namespaces, applies firewall rules manually and with Ansible, exposes Django REST APIs for policies, routes, config history, rollback requests, and alerts, and provides a React + Tailwind dashboard for the lab workflow.
 
 ## Current MVP Scope
 
@@ -13,6 +13,7 @@ Small MVP for a network security automation lab. This slice creates a simulated 
 2. Apply manual `iptables` firewall rules.
 3. Apply the same firewall policy with Ansible.
 4. Store firewall rules, static routes, config snapshots, rollback requests, and alerts through REST APIs.
+5. View and operate the lab through a React dashboard.
 
 ## Hosted Demo Vs Self-Hosted Lab
 
@@ -20,9 +21,10 @@ There are two ways to test NetGuardAutomator.
 
 ### Hosted Oracle Demo
 
-If the Oracle Cloud VM is running and public ingress for TCP `8000` is enabled, testers do not need to run a VM or install anything locally. They can use the hosted API directly:
+If the Oracle Cloud VM is running and public ingress is enabled, testers do not need to run a VM or install anything locally. They can use the hosted React dashboard and API directly:
 
 ```text
+http://150.136.56.25:5173/
 http://150.136.56.25:8000/api/firewall-rules/
 http://150.136.56.25:8000/api/routes/
 http://150.136.56.25:8000/api/config-history/
@@ -73,7 +75,9 @@ Do not expose PostgreSQL ports `5432` or `5433` publicly.
 
 ```mermaid
 flowchart LR
-    user[Browser / curl user] -->|HTTP :8000| api[Django REST API]
+    user[Browser user] -->|HTTP :5173| ui[React + Tailwind UI]
+    ui -->|/api proxy| api[Django REST API]
+    curl[curl / API user] -->|HTTP :8000| api
     api -->|ORM| db[(PostgreSQL)]
     api -->|subprocess| ansible[Ansible Playbooks]
     ansible -->|ip netns exec| firewall[firewall namespace<br/>iptables + routing]
@@ -105,6 +109,7 @@ Key directories:
 
 ```text
 backend/   Django REST API, models, serializers, config apply and rollback logic
+frontend/  React + Tailwind dashboard for policy, route, snapshot, and alert workflows
 ansible/   Inventory, firewall/route/rollback playbooks, templates
 lab/       Linux namespace setup and teardown scripts
 monitor/   Health, drift, route, and traffic detection scripts
@@ -125,6 +130,33 @@ Django is used for:
 - Audit history by storing rendered configs, Ansible stdout/stderr, timestamps, and success/failure state.
 - Rollback by replaying a saved config snapshot through Ansible.
 - Monitoring visibility by exposing health, drift, route, and traffic alerts through `/api/alerts/`.
+
+## React Dashboard
+
+The React UI lives in `frontend/`. It reads public API data and sends the `X-NetGuard-API-Key` header only for protected write actions.
+
+Start Django first:
+
+```bash
+cd backend
+python manage.py runserver 0.0.0.0:8000
+```
+
+Then start the frontend in another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173/
+```
+
+The Vite dev server proxies `/api/...` to Django on `127.0.0.1:8000`, so no CORS changes are needed for local development.
 
 ## Git Workflow
 
@@ -147,6 +179,7 @@ After testing a phase, open a pull request from `dev` into `main`.
 - `ansible`
 - Docker and Docker Compose for PostgreSQL
 - Django REST Framework dependencies from `requirements.txt`
+- Node.js and npm for the React dashboard
 
 macOS does not support Linux network namespaces directly, so run these commands inside a Linux environment.
 
