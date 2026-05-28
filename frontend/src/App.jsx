@@ -10,6 +10,8 @@ import {
   Route,
   Shield,
   TerminalSquare,
+  Trash2,
+  Power,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -281,6 +283,30 @@ function App() {
     });
   }
 
+  function toggleFirewallRule(rule) {
+    runWriteAction(`toggle-rule-${rule.id}`, async () => {
+      const updated = await requestJson(`/api/firewall-rules/${rule.id}/`, {
+        method: "PATCH",
+        headers: apiHeaders(apiKey, { "Content-Type": "application/json" }),
+        body: JSON.stringify({ enabled: !rule.enabled }),
+      });
+      return `Rule #${updated.id} is now ${updated.enabled ? "enabled" : "disabled"}. Click Apply Config to push the change.`;
+    });
+  }
+
+  function deleteFirewallRule(rule) {
+    const shouldDelete = window.confirm(`Delete firewall rule #${rule.id}? Apply Config after deleting to update iptables.`);
+    if (!shouldDelete) return;
+
+    runWriteAction(`delete-rule-${rule.id}`, async () => {
+      await requestJson(`/api/firewall-rules/${rule.id}/`, {
+        method: "DELETE",
+        headers: apiHeaders(apiKey),
+      });
+      return `Deleted firewall rule #${rule.id}. Click Apply Config to push the change.`;
+    });
+  }
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-line bg-white/90">
@@ -337,7 +363,7 @@ function App() {
                 </div>
               ) : firewallRules.length ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] table-fixed border-collapse">
+                  <table className="w-full min-w-[860px] table-fixed border-collapse">
                     <thead>
                       <tr className="border-b border-line text-left text-xs uppercase text-slate-500">
                         <th className="px-3 py-2">Action</th>
@@ -346,6 +372,7 @@ function App() {
                         <th className="px-3 py-2">Protocol</th>
                         <th className="px-3 py-2">Port</th>
                         <th className="px-3 py-2">Enabled</th>
+                        <th className="px-3 py-2">Manage</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -358,7 +385,29 @@ function App() {
                           <td className="break-words px-3 py-3 text-sm">{rule.destination_ip}</td>
                           <td className="px-3 py-3 text-sm">{rule.protocol}</td>
                           <td className="px-3 py-3 text-sm">{rule.port || "any"}</td>
-                          <td className="px-3 py-3 text-sm">{rule.enabled ? "yes" : "no"}</td>
+                          <td className="px-3 py-3 text-sm">
+                            <StatusPill tone={rule.enabled ? "success" : "neutral"}>{rule.enabled ? "yes" : "no"}</StatusPill>
+                          </td>
+                          <td className="px-3 py-3">
+                            <div className="flex flex-wrap gap-2">
+                              <PrimaryButton
+                                disabled={submitting === `toggle-rule-${rule.id}`}
+                                icon={Power}
+                                onClick={() => toggleFirewallRule(rule)}
+                                tone="secondary"
+                              >
+                                {rule.enabled ? "Disable" : "Enable"}
+                              </PrimaryButton>
+                              <PrimaryButton
+                                disabled={submitting === `delete-rule-${rule.id}`}
+                                icon={Trash2}
+                                onClick={() => deleteFirewallRule(rule)}
+                                tone="danger"
+                              >
+                                Delete
+                              </PrimaryButton>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
