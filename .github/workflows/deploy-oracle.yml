@@ -41,4 +41,4 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh oracle-vm 'cd /home/ubuntu/NetGuardAutomator && BRANCH=main ./scripts/deploy_oracle.sh'
+          ssh oracle-vm 'cd /home/ubuntu/NetGuardAutomator && git fetch origin main && git switch main && git pull --ff-only origin main && BRANCH=main ./scripts/deploy_oracle.sh'
