@@ -361,6 +361,12 @@ source .venv/bin/activate
 
 The demo script resets demo firewall and route records, recreates the namespace topology, starts a temporary HTTP server in the `server` namespace, applies API-backed config with Ansible, verifies firewall/route/health/drift behavior, tests rollback, and creates a traffic-volume alert.
 
+Demo screenshot and output checklist:
+
+```text
+docs/demo-evidence.md
+```
+
 ## 7. Deploy On Oracle Cloud
 
 The full lab requires a Linux VM because it uses network namespaces, `iptables`, Docker, and long-running Django services.
