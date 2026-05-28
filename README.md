@@ -228,6 +228,27 @@ curl -X POST http://127.0.0.1:8000/api/apply-config/ | python -m json.tool
 python monitor/route_verifier.py
 ```
 
+## 6. Run The End-To-End Demo
+
+Start PostgreSQL and Django first:
+
+```bash
+docker compose up -d postgres
+cd backend
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
+```
+
+In another terminal, run:
+
+```bash
+cd ~/network-security-automation-lab
+source .venv/bin/activate
+./scripts/demo.sh
+```
+
+The demo script resets demo firewall and route records, recreates the namespace topology, starts a temporary HTTP server in the `server` namespace, applies API-backed config with Ansible, verifies firewall/route/health/drift behavior, tests rollback, and creates a traffic-volume alert.
+
 ## Cleanup
 
 ```bash
