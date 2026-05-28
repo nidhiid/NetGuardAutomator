@@ -5,6 +5,7 @@ import {
   KeyRound,
   Loader2,
   Network,
+  Radio,
   RefreshCw,
   RotateCcw,
   Route,
@@ -204,6 +205,7 @@ function App() {
   const [ruleForm, setRuleForm] = useState(emptyRule);
   const [routeForm, setRouteForm] = useState(emptyRoute);
   const [loading, setLoading] = useState(true);
+  const [labTest, setLabTest] = useState(null);
   const [submitting, setSubmitting] = useState("");
   const [notice, setNotice] = useState(null);
 
@@ -325,6 +327,22 @@ function App() {
       });
       return `Deleted firewall rule #${rule.id}. Click Apply Config to push the change.`;
     });
+  }
+
+  async function runLabTest(testType) {
+    setSubmitting(`lab-${testType}`);
+    try {
+      const result = await requestJson(`/api/lab-tests/${testType}/`);
+      setLabTest(result);
+      setNotice({
+        type: result.success ? "success" : "error",
+        text: `${testType === "ping" ? "Ping" : "HTTP"} test ${result.success ? "passed" : "failed"}.`,
+      });
+    } catch (error) {
+      setNotice({ type: "error", text: error.message });
+    } finally {
+      setSubmitting("");
+    }
   }
 
   return (
@@ -539,6 +557,29 @@ function App() {
               <PrimaryButton disabled={submitting === "apply"} icon={Network} onClick={applyConfig}>
                 {submitting === "apply" ? "Applying..." : "Apply Config"}
               </PrimaryButton>
+            </Panel>
+
+            <Panel title="Live Lab Tests" subtitle="Run bounded checks from client namespace to server namespace.">
+              <div className="flex flex-wrap gap-2">
+                <PrimaryButton disabled={submitting === "lab-ping"} icon={Radio} onClick={() => runLabTest("ping")} tone="secondary">
+                  {submitting === "lab-ping" ? "Running..." : "Ping Test"}
+                </PrimaryButton>
+                <PrimaryButton disabled={submitting === "lab-http"} icon={TerminalSquare} onClick={() => runLabTest("http")}>
+                  {submitting === "lab-http" ? "Running..." : "HTTP Test"}
+                </PrimaryButton>
+              </div>
+
+              {labTest ? (
+                <div className="mt-4 rounded-md border border-line bg-slate-50 p-3">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <StatusPill tone={labTest.success ? "success" : "danger"}>{labTest.success ? "passed" : "failed"}</StatusPill>
+                    <span className="text-sm font-bold uppercase text-slate-500">{labTest.test_type}</span>
+                  </div>
+                  <pre className="max-h-44 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-slate-100">
+                    {labTest.stdout || labTest.stderr || "No command output."}
+                  </pre>
+                </div>
+              ) : null}
             </Panel>
 
             <Panel title="Add Firewall Rule" subtitle="Create ALLOW or DENY policy rows.">

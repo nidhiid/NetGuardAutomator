@@ -3,7 +3,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from configs.views import ApplyConfigView, ConfigSnapshotViewSet, RollbackConfigView
-from monitoring.views import SecurityAlertViewSet
+from monitoring.views import LabHttpTestView, LabPingTestView, SecurityAlertViewSet
 from policies.views import FirewallRuleViewSet
 from routes.views import StaticRouteViewSet
 
@@ -19,4 +19,6 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/apply-config/", ApplyConfigView.as_view(), name="apply-config"),
     path("api/rollback/<int:snapshot_id>/", RollbackConfigView.as_view(), name="rollback-config"),
+    path("api/lab-tests/ping/", LabPingTestView.as_view(), name="lab-test-ping"),
+    path("api/lab-tests/http/", LabHttpTestView.as_view(), name="lab-test-http"),
 ]
